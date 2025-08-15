@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Bergen busstasjon — Departures by line</title>
+<title>Bergen busstasjon — All departures (Bus + Bybanen)</title>
 <style>
   :root{
     --bg:#ffffff;
@@ -21,7 +21,7 @@
   html,body{height:100%}
   body{margin:0;font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial;background: var(--bg);color: var(--text);}
   .wrap{max-width:1280px;margin:40px auto;padding:0 18px}
-  h1{margin:0 0 8px;font-size:clamp(24px,3vw,38px);font-weight:800;letter-spacing:.2px}
+  h1{margin:0 0 10px;font-size:clamp(24px,3vw,38px);font-weight:800;letter-spacing:.2px}
   .badge{display:inline-flex;gap:.6rem;align-items:center;background:var(--card);border:1px solid var(--border);color:var(--muted);padding:.5rem .9rem;border-radius:999px;font-size:.88rem;font-weight:600;margin-bottom:16px}
   .accent{color:var(--accent)}
   .controls{display:flex;gap:.6rem;flex-wrap:wrap;margin:10px 0 18px}
@@ -31,137 +31,236 @@
   .search{min-width:260px;flex:1 1 280px;background:#fff;border:1px solid var(--border);color:var(--text);padding:.65rem .85rem;border-radius:12px;outline:none}
   #status{color:var(--muted);font-size:.95rem;margin:8px 0}
   #hint{color:var(--muted);font-size:.9rem;margin:6px 0}
-  .grid{display:grid;gap:14px}
-  .group{background:#fff;border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 8px 24px rgba(17,24,39,.06)}
-  .ghead{display:flex;align-items:center;gap:10px;background:var(--card);padding:12px 16px;border-bottom:1px solid var(--border)}
-  .lineTag{display:inline-flex;align-items:center;justify-content:center;font-weight:800;min-width:56px;padding:8px 12px;border-radius:10px;border:1px solid var(--accent);color:#8b3d00;background:linear-gradient(180deg,var(--accent-weak),#ffb26b)}
-  .tram{background:linear-gradient(180deg,#ffe4cc,#ff9e4a);color:#7a2e00}
-  .gtitle{font-weight:800}
-  .rows{display:grid}
-  .row{display:grid;grid-template-columns: 94px 76px 1fr 180px 110px;gap:12px;align-items:center;padding:12px 16px;border-bottom:1px dashed var(--border)}
-  .row:last-child{border-bottom:none}
-  .row:hover{background:#fafbfc}
-  .time{font-variant-numeric:tabular-nums}
-  .mins{color:var(--muted);font-size:.92rem}
-  .dest,.stop{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .pill{font-size:.82rem;padding:4px 8px;border-radius:999px;background:#fff;border:1px solid var(--border);color:var(--muted)}
-  .dot{width:8px;height:8px;border-radius:999px;background:var(--good);display:inline-block;margin-left:8px;box-shadow:0 0 0 3px rgba(22,163,74,.18)}
-  .late{color:var(--bad)} .delay{color:var(--warn)}
-  .footer{display:flex;justify-content:space-between;align-items:center;padding:10px 2px;color:var(--muted);font-size:.92rem;margin-top:12px}
-  .error{color:var(--bad);font-weight:700}
+  .table{background:#fff;border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 8px 24px rgba(17,24,39,.06)}
+  .thead,.trow{display:grid;grid-template-columns: 94px 76px 100px 1fr 180px 110px;gap:0;align-items:center}
+  .thead{background:var(--card);color:var(--muted);font-weight:700;border-bottom:1px solid var(--border)}
+  .cell{padding:12px 16px;border-bottom:1px dashed var(--border)}
+  .trow:last-child .cell{border-bottom:none}
+  .line-pill{display:inline-flex;align-items:center;gap:.45rem;padding:.12rem .52rem;border-radius:8px;border:1px solid var(--accent);color:var(--accent);background:rgba(249,115,22,.08);font-weight:800;letter-spacing:.3px}
+  .dest-dim{color:var(--muted)}
+  .footer{display:flex;justify-content:space-between;gap:1rem;align-items:center;color:var(--muted);margin:10px 2px 0}
+  .err{color:var(--bad);margin:10px 0 0;font-weight:600}
   .debug{margin-top:10px;font-size:.88rem;color:#334155;background:#fff;border:1px dashed var(--border);border-radius:12px;padding:8px 10px}
   .debug code{background:#f3f4f6;border:1px solid var(--border);padding:1px 4px;border-radius:6px}
-  @media(max-width:820px){ .row{grid-template-columns: 88px 70px 1fr 0px 100px} .row .stop{display:none}}
+  .chip .dot{width:12px;height:12px;border-radius:999px;background:var(--accent);display:inline-block}
+  @media (max-width:880px){
+    .thead,.trow{grid-template-columns: 86px 70px 86px 1fr 140px 96px}
+  }
+  @media (max-width:680px){
+    .thead{display:none}
+    .trow{grid-template-columns: 86px 1fr; row-gap:6px}
+    .cell{border:none; padding:10px 12px}
+    .cell.time{grid-column:1/2; grid-row:1}
+    .cell.in{grid-column:1/2; grid-row:2; color:var(--muted)}
+    .cell.line{grid-column:2/3; grid-row:1}
+    .cell.dest{grid-column:2/3; grid-row:2}
+    .cell.stop{grid-column:2/3; grid-row:3}
+    .cell.mode{grid-column:2/3; grid-row:4}
+  }
 </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Bergen busstasjon — <span class="accent">Departures by line</span></h1>
-    <div class="badge">Bergen busstasjon • Bus + Bybanen (lines 1 & 2) • Refresh 15s</div>
+    <h1>Bergen busstasjon — <span class="accent">All departures</span></h1>
+    <div class="badge">Auto-discovers stop IDs • Bus + Bybanen • Refresh 15s</div>
 
     <div class="controls">
-      <label class="chip"><input id="busToggle" type="checkbox" checked /> Bus</label>
-      <label class="chip"><input id="tramToggle" type="checkbox" checked /> Bybanen</label>
-      <input id="exactFilter" class="search" placeholder="Exact line filter (comma): e.g. 1, 2, 50E, 600" />
+      <label class="chip"><input id="busToggle" type="checkbox" checked /> <span class="dot"></span> Bus</label>
+      <label class="chip"><input id="tramToggle" type="checkbox" checked /> <span class="dot"></span> Bybanen</label>
+      <input id="exactFilter" class="search" placeholder="Optional exact line filter (comma): e.g. 1, 2, 50E, 600" />
     </div>
 
-    <div id="status" aria-live="polite">Loading…</div>
-    <div id="hint"></div>
-    <div id="debug" class="debug" style="display:none"></div>
+    <div id="status" class="status">Finding stop places…</div>
+    <div id="error" class="err" style="display:none"></div>
 
-    <div id="groups" class="grid" aria-label="Groups by line"></div>
+    <div class="table">
+      <div class="thead">
+        <div class="cell">Time</div>
+        <div class="cell">In</div>
+        <div class="cell">Line</div>
+        <div class="cell">Destination</div>
+        <div class="cell">Stop</div>
+        <div class="cell">Mode</div>
+      </div>
+      <div id="rows"></div>
+    </div>
+
+    <div class="debug" id="debug" style="display:none"></div>
 
     <div class="footer">
-      <div>Source: Entur realtime • StopPlaces <code>NSR:StopPlace:30810</code> (bus) + <code>NSR:StopPlace:62356</code> (Bybanen)</div>
+      <div>Source: Entur realtime • Geocoder + Journey Planner • Operator: Skyss (skyss.no)</div>
       <div>Last update: <span id="ts">—</span></div>
     </div>
   </div>
 
 <script>
-const ENTUR_ENDPOINTS = [
-  "https://api.entur.io/journey-planner/v3/graphql",
-  "https://api.entur.org/journeyplanner/2.0/index/graphql"
-];
-const ET_CLIENT = "bergen-board/index-v1 (+contact: you@example.com)";
-const STOPPLACES = { BUS: ["NSR:StopPlace:30810","NSR:StopPlace:62129"], TRAM: ["NSR:StopPlace:62356"] };
-const BUS_FALLBACK_QUAYS = ["NSR:Quay:53022","NSR:Quay:53023","NSR:Quay:53024","NSR:Quay:53025","NSR:Quay:53026","NSR:Quay:53027","NSR:Quay:53028","NSR:Quay:53029","NSR:Quay:53030","NSR:Quay:53031","NSR:Quay:53032","NSR:Quay:53034","NSR:Quay:53035","NSR:Quay:53045","NSR:Quay:100080","NSR:Quay:106982"];
-const REFRESH_MS = 15000, PER_FETCH = 80, RANGE_SECONDS = 6*3600;
+const CLIENT = "bergen-board/auto-discover (contact: you@example.com)";
+const ENTUR_GC = "https://api.entur.io/geocoder/v1/autocomplete";
+const GP_V3 = "https://api.entur.io/journey-planner/v3/graphql";
+const GP_V2 = "https://api.entur.org/journeyplanner/2.0/index/graphql";
+const ENDPOINTS = [GP_V3, GP_V2];
+
+const FALLBACK_STOP_IDS = ["NSR:StopPlace:30810","NSR:StopPlace:62129","NSR:StopPlace:62356"];
+const REFRESH_MS = 15000, RANGE_SECONDS = 6*3600, PER_FETCH = 120;
+
 const $ = s => document.querySelector(s);
-const pad2=n=>(n<10?"0"+n:""+n), fmtTime=d=>{const t=new Date(d); return pad2(t.getHours())+":"+pad2(t.getMinutes());};
-const minutesFromNow=d=>Math.max(0,Math.round((new Date(d)-new Date())/60000));
-const natSort=(a,b)=>(""+a).localeCompare(""+b,undefined,{numeric:true,sensitivity:"base"});
-function readExactFilter(){const raw=$("#exactFilter").value.trim(); if(!raw) return null; return raw.split(",").map(s=>s.trim().toUpperCase()).filter(Boolean);}
-const GQL_STOPPLACE=`query($id:ID!,$per:Int!,$range:Int!){ stopPlace(id:$id){ id name estimatedCalls(timeRange:$range, numberOfDepartures:$per){ expectedDepartureTime realtime aimedDepartureTime predictionInaccurate destinationDisplay{frontText} quay{id publicCode name} serviceJourney{journeyPattern{ line{id publicCode name transportMode} } } } } }`;
-const GQL_STOPPLACE_QUAYS=`query($id:ID!,$per:Int!,$range:Int!){ stopPlace(id:$id){ id name quays{ id publicCode name estimatedCalls(timeRange:$range, numberOfDepartures:$per){ expectedDepartureTime realtime aimedDepartureTime predictionInaccurate destinationDisplay{frontText} quay{id publicCode name} serviceJourney{journeyPattern{ line{id publicCode name transportMode} } } } } } }`;
-const GQL_QUAY=`query($id:ID!,$per:Int!,$range:Int!){ quay(id:$id){ id publicCode name estimatedCalls(timeRange:$range, numberOfDepartures:$per){ expectedDepartureTime realtime aimedDepartureTime predictionInaccurate destinationDisplay{frontText} quay{id publicCode name} serviceJourney{journeyPattern{ line{id publicCode name transportMode} } } } } }`;
-async function gqlFetchAny(query, variables){
-  let lastErr=null,lastJson=null;
-  for(const url of ENTUR_ENDPOINTS){
-    try{
-      const res=await fetch(url,{method:"POST",headers:{"content-type":"application/json","ET-Client-Name":ET_CLIENT},body:JSON.stringify({query,variables})});
-      const json=await res.json(); lastJson=json; if(json && !json.errors) return json; lastErr=new Error((json&&json.errors&&json.errors[0]&&json.errors[0].message)||"GraphQL error");
-    }catch(e){lastErr=e;}
-  }
-  if(lastJson) throw new Error("All endpoints returned errors");
-  throw lastErr||new Error("Unknown network error");
+const pad2 = n => (n<10 ? "0"+n : ""+n);
+const fmt = d => { const t=new Date(d); return `${pad2(t.getHours())}:${pad2(t.getMinutes())}`; };
+const mins = d => Math.max(0, Math.round((new Date(d)-Date.now())/60000));
+const nat = (a,b) => (""+a).localeCompare(""+b, undefined, {numeric:true, sensitivity:"base"});
+
+function readLines(){
+  const raw = $("#exactFilter").value.trim();
+  if (!raw) return null;
+  return raw.split(",").map(s=>s.trim().toUpperCase()).filter(Boolean);
 }
-async function load(){
-  const showBus=$("#busToggle").checked, showTram=$("#tramToggle").checked, exact=readExactFilter();
-  $("#status").textContent="Loading…"; $("#hint").textContent=""; $("#debug").style.display="none";
-  let all=[], dbg={stopPlaceCalls:0, stopPlaceQuays:0, quayFallback:0};
-  async function collectFromStopPlace(id,modeTag){
-    let added=0;
-    try{ const r=await gqlFetchAny(GQL_STOPPLACE,{id,per:PER_FETCH,range:RANGE_SECONDS}); const calls=(r?.data?.stopPlace?.estimatedCalls)||[]; calls.forEach(c=>{all.push({call:c,mode:modeTag});added++;}); if(calls.length) dbg.stopPlaceCalls+=calls.length; if(added) return added; }catch(_){}
-    try{ const r2=await gqlFetchAny(GQL_STOPPLACE_QUAYS,{id,per:PER_FETCH,range:RANGE_SECONDS}); const quays=(r2?.data?.stopPlace?.quays)||[]; for(const q of quays){ const calls=q?.estimatedCalls||[]; calls.forEach(c=>{all.push({call:c,mode:modeTag});added++;}); } if(added) dbg.stopPlaceQuays+=added; return added; }catch(_){}
-    return 0;
+
+async function findStopPlaces(){
+  const url = new URL(ENTUR_GC);
+  url.searchParams.set("text","Bergen busstasjon");
+  url.searchParams.set("lang","no");
+  url.searchParams.set("size","20");
+  url.searchParams.set("focus.point.lat","60.389");
+  url.searchParams.set("focus.point.lon","5.333");
+
+  try{
+    const res = await fetch(url.toString(), {headers:{"ET-Client-Name": CLIENT}});
+    const js = await res.json();
+    const ids = [];
+    (js.features||[]).forEach(f=>{
+      const id = f?.properties?.id || "";
+      if (id.startsWith("NSR:StopPlace:") && !ids.includes(id)) ids.push(id);
+    });
+    const filtered = ids.slice(0,6);
+    const all = Array.from(new Set([...filtered, ...FALLBACK_STOP_IDS]));
+    return all;
+  }catch(e){
+    return Array.from(new Set(FALLBACK_STOP_IDS));
   }
-  if(showBus){
-    let got=0; for(const id of STOPPLACES.BUS){ got+=await collectFromStopPlace(id,"BUS"); }
-    if(got===0){
-      const tasks=BUS_FALLBACK_QUAYS.map(qid=>gqlFetchAny(GQL_QUAY,{id:qid,per:PER_FETCH,range:RANGE_SECONDS}).then(json=>{const calls=(json?.data?.quay?.estimatedCalls)||[]; calls.forEach(c=>{all.push({call:c,mode:"BUS"});dbg.quayFallback++;});}).catch(()=>{}));
-      await Promise.all(tasks);
+}
+
+const GQL_SP = `
+query($id:ID!,$per:Int!,$range:Int!){
+  stopPlace(id:$id){
+    id name
+    quays{
+      id publicCode name
+      estimatedCalls(timeRange:$range, numberOfDepartures:$per){
+        expectedDepartureTime realtime aimedDepartureTime destinationDisplay{frontText}
+        quay{id publicCode name}
+        serviceJourney{journeyPattern{line{id publicCode name transportMode}}}
+      }
     }
   }
-  if(showTram){ for(const id of STOPPLACES.TRAM){ await collectFromStopPlace(id,"TRAM"); } }
-  let rows=all.map(({call,mode})=>{
-    const line=(call?.serviceJourney?.journeyPattern?.line)||{};
-    const code=(line.publicCode||line.name||"").toUpperCase();
-    const dest=call?.destinationDisplay?.frontText||"";
-    const stop=call?.quay?.publicCode?("Perrong "+call.quay.publicCode):(call?.quay?.name||"—");
-    const whenISO=call?.expectedDepartureTime;
-    const mins=minutesFromNow(whenISO);
-    const transport=(line.transportMode||(mode==="TRAM"?"tram":"bus")).toUpperCase();
-    const aimed=call?.aimedDepartureTime?new Date(call.aimedDepartureTime):null;
-    const expected=whenISO?new Date(whenISO):aimed;
-    const delayMin=(aimed&&expected)?Math.round((expected-aimed)/60000):0;
-    return {t:whenISO,inMin:mins,line:code,dest,stop,mode:transport,delayMin};
-  });
-  if(exact&&exact.length){ rows=rows.filter(r=>exact.includes(r.line)); }
-  rows=rows.filter(r=>(r.mode!=="TRAM"||showTram)&&(r.mode!=="BUS"||showBus));
-  rows=rows.filter(r=>(r.mode!=="TRAM")||r.line==="1"||r.line==="2");
-  rows=rows.filter(r=>!!r.t);
-  const groups=new Map(); for(const r of rows){ const key=r.line||"—"; if(!groups.has(key)) groups.set(key,[]); groups.get(key).push(r); }
-  const orderedKeys=Array.from(groups.keys()).sort(natSort); for(const k of orderedKeys){ groups.get(k).sort((a,b)=>new Date(a.t)-new Date(b.t)); }
-  renderGroups(orderedKeys,groups);
-  $("#ts").textContent=new Date().toLocaleTimeString([], {hour:"2-digit", minute:"2-digit", second:"2-digit"});
-  $("#status").textContent="Loaded";
-  $("#debug").style.display="block";
-  $("#debug").innerHTML=`<div><strong>Debug:</strong> stopPlace calls=${dbg.stopPlaceCalls}, quays calls=${dbg.stopPlaceQuays}, quay-fallback added=${dbg.quayFallback}</div>`;
+}`;
+
+async function gql(query,variables){
+  let lastErr=null;
+  for (const url of ENDPOINTS){
+    try{
+      const res = await fetch(url, {
+        method:"POST",
+        headers: {"content-type":"application/json","ET-Client-Name": CLIENT},
+        body: JSON.stringify({query, variables})
+      });
+      const js = await res.json();
+      if (!js.errors) return js;
+      lastErr = new Error(js.errors[0]?.message || "GraphQL error");
+    }catch(e){ lastErr=e; }
+  }
+  throw lastErr || new Error("All endpoints failed");
 }
-function renderGroups(keys,groups){
-  const host=$("#groups");
-  if(!keys.length){ host.innerHTML=`<section class="group"><div class="ghead"><span class="gtitle">No upcoming departures</span></div><div class="rows"><div class="row"><div class="time">—</div><div class="mins">—</div><div class="dest">—</div><div class="stop">—</div><div class="pill">—</div></div></div></section>`; return; }
-  host.innerHTML=keys.map(code=>{
-    const items=groups.get(code)||[]; const sample=items[0]||{}; const isTram=sample.mode==="TRAM";
-    const rows=items.map(it=>{ const minsLabel=it.inMin===0?"Now":it.inMin+" min"; const delayCls=it.delayMin>=3?"late":(it.delayMin>0?"delay":""); return `<div class="row">
-      <div class="time">${fmtTime(it.t)}</div><div class="mins ${delayCls}">${minsLabel}</div><div class="dest" title="${it.dest}">${it.dest||"—"}</div><div class="stop" title="${it.stop}">${it.stop||"—"}</div><div class="pill">${it.mode==="TRAM"?"Bybanen":"Bus"} <span class="dot" style="background:${it.inMin<=1?'var(--good)':'#9aa4ad'}"></span></div></div>`; }).join("");
-    return `<section class="group" aria-label="Line ${code}"><div class="ghead"><span class="lineTag ${isTram?"tram":""}">${code}</span><span class="gtitle">${isTram?"Bybanen":"Bus"}</span><span class="mins" style="margin-left:auto">${items.length} departures</span></div><div class="rows">${rows}</div></section>`;
-  }).join("");
+
+function buildRowsFromStopPlace(sp){
+  const rows = [];
+  const quays = sp?.quays || [];
+  for (const q of quays){
+    const calls = q?.estimatedCalls || [];
+    for (const c of calls){
+      const line = c?.serviceJourney?.journeyPattern?.line || {};
+      rows.push({
+        t: c?.expectedDepartureTime,
+        in: mins(c?.expectedDepartureTime),
+        line: (line.publicCode || line.name || "").toUpperCase(),
+        dest: (c?.destinationDisplay?.frontText || "").trim(),
+        stop: q?.publicCode ? `Perrong ${q.publicCode}` : (q?.name || "—"),
+        mode: (line.transportMode || "").toUpperCase()
+      });
+    }
+  }
+  return rows;
 }
-$("#busToggle").addEventListener("change", load);
-$("#tramToggle").addEventListener("change", load);
-$("#exactFilter").addEventListener("change", load);
-let timer=null; async function start(){ try{ await load(); } catch(e){ $("#status").innerHTML=`<span class="error">Error:</span> ${(e&&e.message)||"Failed to fetch"}`; } finally{ if(timer) clearInterval(timer); timer=setInterval(load, 15000); } } start();
+
+async function load(){
+  $("#status").textContent = "Looking up live quays…";
+  $("#error").style.display = "none";
+  $("#debug").style.display = "none";
+
+  const ids = await findStopPlaces();
+
+  const allRows = [];
+  let totalQuays = 0, spCount=0;
+  for (const id of ids){
+    try{
+      const js = await gql(GQL_SP, {id, per: PER_FETCH, range: RANGE_SECONDS});
+      const sp = js?.data?.stopPlace;
+      if (sp){
+        spCount++;
+        totalQuays += (sp.quays || []).length;
+        allRows.push(...buildRowsFromStopPlace(sp));
+      }
+    }catch(_){}
+  }
+
+  const showBus = $("#busToggle").checked;
+  const showTram = $("#tramToggle").checked;
+  const exact = readLines();
+
+  let rows = allRows
+    .filter(r => r.t)
+    .filter(r => (r.mode!=="TRAM" || showTram) && (r.mode!=="BUS" || showBus));
+
+  if (exact && exact.length) rows = rows.filter(r => exact.includes(r.line));
+
+  rows.sort((a,b)=> new Date(a.t) - new Date(b.t));
+
+  render(rows);
+
+  $("#status").textContent = "Loaded";
+  $("#ts").textContent = new Date().toLocaleTimeString([], {hour:"2-digit", minute:"2-digit", second:"2-digit"});
+  $("#debug").style.display = "block";
+  $("#debug").innerHTML = \`<strong>Debug:</strong> stopPlace IDs tried = \${ids.join(", ")} | stopPlaces found=\${spCount}, quays=\${totalQuays}, rows=\${rows.length}\`;
+}
+
+function render(rows){
+  const host = document.getElementById("rows");
+  host.innerHTML = "";
+  if (!rows.length){
+    const r = document.createElement("div");
+    r.className = "trow";
+    r.innerHTML = '<div class="cell time">—</div><div class="cell in">—</div><div class="cell line"><span class="dest-dim">No upcoming departures</span></div><div class="cell dest"></div><div class="cell stop"></div><div class="cell mode"></div>';
+    host.appendChild(r);
+    return;
+  }
+  for (const row of rows){
+    const el = document.createElement("div");
+    el.className = "trow";
+    el.innerHTML = \`
+      <div class="cell time">\${fmt(row.t)}</div>
+      <div class="cell in">\${row.in} min</div>
+      <div class="cell line"><span class="line-pill">\${row.line}</span></div>
+      <div class="cell dest">\${row.dest}</div>
+      <div class="cell stop">\${row.stop}</div>
+      <div class="cell mode">\${row.mode==="TRAM"?"Bybanen":"Bus"}</div>\`;
+    host.appendChild(el);
+  }
+}
+
+document.getElementById("busToggle").addEventListener("change", load);
+document.getElementById("tramToggle").addEventListener("change", load);
+document.getElementById("exactFilter").addEventListener("change", load);
+load();
+setInterval(load, 15000);
 </script>
 </body>
 </html>
