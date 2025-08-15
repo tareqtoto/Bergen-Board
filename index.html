@@ -6,140 +6,114 @@
 <title>Bergen busstasjon — All departures (Bus + Bybanen)</title>
 <style>
   :root{
-    --bg:#ffffff;
-    --card:#f7f8fb;
-    --text:#0b1220;
-    --muted:#5a6778;
-    --accent:#f97316;
-    --accent-weak:#fbd1a7;
-    --good:#16a34a;
-    --warn:#ca8a04;
-    --bad:#dc2626;
-    --border:#e6eaf0;
+    --bg:#ffffff; --card:#f7f8fb; --text:#0b1220; --muted:#5a6778;
+    --accent:#f97316; --accent-weak:#fbd1a7;
+    --good:#16a34a; --warn:#ca8a04; --bad:#dc2626; --border:#e6eaf0;
   }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{margin:0;font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial;background: var(--bg);color: var(--text);}
+  *{box-sizing:border-box} html,body{height:100%}
+  body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;background:var(--bg);color:var(--text)}
   .wrap{max-width:1280px;margin:40px auto;padding:0 18px}
-  h1{margin:0 0 10px;font-size:clamp(24px,3vw,38px);font-weight:800;letter-spacing:.2px}
-  .badge{display:inline-flex;gap:.6rem;align-items:center;background:var(--card);border:1px solid var(--border);color:var(--muted);padding:.5rem .9rem;border-radius:999px;font-size:.88rem;font-weight:600;margin-bottom:16px}
+  h1{margin:0 0 10px;font-size:clamp(24px,3vw,38px);font-weight:800}
   .accent{color:var(--accent)}
+  .badge{display:inline-flex;gap:.6rem;align-items:center;background:var(--card);border:1px solid var(--border);color:var(--muted);padding:.5rem .9rem;border-radius:999px;font-size:.88rem;font-weight:600;margin-bottom:16px}
   .controls{display:flex;gap:.6rem;flex-wrap:wrap;margin:10px 0 18px}
-  .chip{display:inline-flex;align-items:center;gap:.56rem;background:var(--card);border:1px solid var(--border);padding:.5rem .85rem;border-radius:999px;user-select:none;cursor:pointer;font-weight:600}
-  .chip input{appearance:none;width:16px;height:16px;border-radius:6px;border:2px solid var(--accent);display:inline-block}
+  .chip{display:inline-flex;align-items:center;gap:.56rem;background:var(--card);border:1px solid var(--border);padding:.5rem .85rem;border-radius:999px;font-weight:600}
+  .chip input{appearance:none;width:16px;height:16px;border-radius:6px;border:2px solid var(--accent)}
   .chip input:checked{background:var(--accent)}
-  .search{min-width:260px;flex:1 1 280px;background:#fff;border:1px solid var(--border);color:var(--text);padding:.65rem .85rem;border-radius:12px;outline:none}
+  .search{min-width:260px;flex:1 1 280px;background:#fff;border:1px solid var(--border);padding:.65rem .85rem;border-radius:12px}
   #status{color:var(--muted);font-size:.95rem;margin:8px 0}
-  #hint{color:var(--muted);font-size:.9rem;margin:6px 0}
   .table{background:#fff;border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 8px 24px rgba(17,24,39,.06)}
-  .thead,.trow{display:grid;grid-template-columns: 94px 76px 100px 1fr 180px 110px;gap:0;align-items:center}
+  .thead,.trow{display:grid;grid-template-columns:94px 76px 100px 1fr 180px 110px;align-items:center}
   .thead{background:var(--card);color:var(--muted);font-weight:700;border-bottom:1px solid var(--border)}
   .cell{padding:12px 16px;border-bottom:1px dashed var(--border)}
   .trow:last-child .cell{border-bottom:none}
-  .line-pill{display:inline-flex;align-items:center;gap:.45rem;padding:.12rem .52rem;border-radius:8px;border:1px solid var(--accent);color:var(--accent);background:rgba(249,115,22,.08);font-weight:800;letter-spacing:.3px}
-  .dest-dim{color:var(--muted)}
+  .line-pill{display:inline-flex;align-items:center;gap:.45rem;padding:.12rem .52rem;border-radius:8px;border:1px solid var(--accent);color:var(--accent);background:rgba(249,115,22,.08);font-weight:800}
   .footer{display:flex;justify-content:space-between;gap:1rem;align-items:center;color:var(--muted);margin:10px 2px 0}
-  .err{color:var(--bad);margin:10px 0 0;font-weight:600}
+  .err{color:var(--bad);margin:8px 0;font-weight:700}
   .debug{margin-top:10px;font-size:.88rem;color:#334155;background:#fff;border:1px dashed var(--border);border-radius:12px;padding:8px 10px}
-  .debug code{background:#f3f4f6;border:1px solid var(--border);padding:1px 4px;border-radius:6px}
-  .chip .dot{width:12px;height:12px;border-radius:999px;background:var(--accent);display:inline-block}
-  @media (max-width:880px){
-    .thead,.trow{grid-template-columns: 86px 70px 86px 1fr 140px 96px}
-  }
-  @media (max-width:680px){
+  @media(max-width:880px){ .thead,.trow{grid-template-columns:86px 70px 86px 1fr 140px 96px} }
+  @media(max-width:680px){
     .thead{display:none}
-    .trow{grid-template-columns: 86px 1fr; row-gap:6px}
-    .cell{border:none; padding:10px 12px}
-    .cell.time{grid-column:1/2; grid-row:1}
-    .cell.in{grid-column:1/2; grid-row:2; color:var(--muted)}
-    .cell.line{grid-column:2/3; grid-row:1}
-    .cell.dest{grid-column:2/3; grid-row:2}
-    .cell.stop{grid-column:2/3; grid-row:3}
-    .cell.mode{grid-column:2/3; grid-row:4}
+    .trow{grid-template-columns:86px 1fr;row-gap:6px}
+    .cell{border:none;padding:10px 12px}
+    .cell.time{grid-column:1/2;grid-row:1}
+    .cell.in{grid-column:1/2;grid-row:2;color:var(--muted)}
+    .cell.line{grid-column:2/3;grid-row:1}
+    .cell.dest{grid-column:2/3;grid-row:2}
+    .cell.stop{grid-column:2/3;grid-row:3}
+    .cell.mode{grid-column:2/3;grid-row:4}
   }
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>Bergen busstasjon — <span class="accent">All departures</span></h1>
-    <div class="badge">Auto-discovers stop IDs • Bus + Bybanen • Refresh 15s</div>
+<div class="wrap">
+  <h1>Bergen busstasjon — <span class="accent">All departures</span></h1>
+  <div class="badge">Auto-discovers stop IDs • Bus + Bybanen • Refresh 15s</div>
 
-    <div class="controls">
-      <label class="chip"><input id="busToggle" type="checkbox" checked /> <span class="dot"></span> Bus</label>
-      <label class="chip"><input id="tramToggle" type="checkbox" checked /> <span class="dot"></span> Bybanen</label>
-      <input id="exactFilter" class="search" placeholder="Optional exact line filter (comma): e.g. 1, 2, 50E, 600" />
-    </div>
-
-    <div id="status" class="status">Finding stop places…</div>
-    <div id="error" class="err" style="display:none"></div>
-
-    <div class="table">
-      <div class="thead">
-        <div class="cell">Time</div>
-        <div class="cell">In</div>
-        <div class="cell">Line</div>
-        <div class="cell">Destination</div>
-        <div class="cell">Stop</div>
-        <div class="cell">Mode</div>
-      </div>
-      <div id="rows"></div>
-    </div>
-
-    <div class="debug" id="debug" style="display:none"></div>
-
-    <div class="footer">
-      <div>Source: Entur realtime • Geocoder + Journey Planner • Operator: Skyss (skyss.no)</div>
-      <div>Last update: <span id="ts">—</span></div>
-    </div>
+  <div class="controls">
+    <label class="chip"><input id="busToggle" type="checkbox" checked /> Bus</label>
+    <label class="chip"><input id="tramToggle" type="checkbox" checked /> Bybanen</label>
+    <input id="exactFilter" class="search" placeholder="Optional exact line filter (comma): e.g. 1, 2, 50E, 600" />
   </div>
 
+  <div id="status">Finding stop places…</div>
+  <div id="error" class="err" style="display:none"></div>
+
+  <div class="table">
+    <div class="thead">
+      <div class="cell">Time</div><div class="cell">In</div><div class="cell">Line</div>
+      <div class="cell">Destination</div><div class="cell">Stop</div><div class="cell">Mode</div>
+    </div>
+    <div id="rows"></div>
+  </div>
+
+  <div class="debug" id="debug" style="display:none"></div>
+
+  <div class="footer">
+    <div>Source: Entur realtime • Geocoder + Journey Planner • Operator: Skyss (skyss.no)</div>
+    <div>Last update: <span id="ts">—</span></div>
+  </div>
+</div>
+
 <script>
-const CLIENT = "bergen-board/auto-discover (contact: you@example.com)";
-const ENTUR_GC = "https://api.entur.io/geocoder/v1/autocomplete";
-const GP_V3 = "https://api.entur.io/journey-planner/v3/graphql";
-const GP_V2 = "https://api.entur.org/journeyplanner/2.0/index/graphql";
-const ENDPOINTS = [GP_V3, GP_V2];
+window.addEventListener("error", (e)=>{
+  const el=document.getElementById("error");
+  el.style.display="block"; el.textContent="Script error: "+(e.message||e.error||"unknown");
+});
 
-const FALLBACK_STOP_IDS = ["NSR:StopPlace:30810","NSR:StopPlace:62129","NSR:StopPlace:62356"];
-const REFRESH_MS = 15000, RANGE_SECONDS = 6*3600, PER_FETCH = 120;
+const CLIENT="bergen-board/auto-discover (contact: you@example.com)";
+const ENTUR_GC="https://api.entur.io/geocoder/v1/autocomplete";
+const GP_V3="https://api.entur.io/journey-planner/v3/graphql";
+const GP_V2="https://api.entur.org/journeyplanner/2.0/index/graphql";
+const ENDPOINTS=[GP_V3,GP_V2];
 
-const $ = s => document.querySelector(s);
-const pad2 = n => (n<10 ? "0"+n : ""+n);
-const fmt = d => { const t=new Date(d); return `${pad2(t.getHours())}:${pad2(t.getMinutes())}`; };
-const mins = d => Math.max(0, Math.round((new Date(d)-Date.now())/60000));
-const nat = (a,b) => (""+a).localeCompare(""+b, undefined, {numeric:true, sensitivity:"base"});
+const FALLBACK_STOP_IDS=["NSR:StopPlace:30810","NSR:StopPlace:62129","NSR:StopPlace:62356"];
+const REFRESH_MS=15000,RANGE_SECONDS=6*3600,PER_FETCH=120;
 
-function readLines(){
-  const raw = $("#exactFilter").value.trim();
-  if (!raw) return null;
-  return raw.split(",").map(s=>s.trim().toUpperCase()).filter(Boolean);
-}
+const $=s=>document.querySelector(s);
+const pad2=n=>(n<10?"0"+n:""+n);
+const fmt=d=>{const t=new Date(d);return `${pad2(t.getHours())}:${pad2(t.getMinutes())}`;};
+const mins=d=>Math.max(0,Math.round((new Date(d)-Date.now())/60000));
+
+function readLines(){const raw=$("#exactFilter").value.trim(); if(!raw) return null; return raw.split(",").map(s=>s.trim().toUpperCase()).filter(Boolean);}
+
+function withTimeout(promise,ms,label){let t;const timeout=new Promise((_,rej)=>t=setTimeout(()=>rej(new Error(label+" timeout after "+ms+"ms")),ms));return Promise.race([promise.finally(()=>clearTimeout(t)),timeout]);}
 
 async function findStopPlaces(){
-  const url = new URL(ENTUR_GC);
-  url.searchParams.set("text","Bergen busstasjon");
-  url.searchParams.set("lang","no");
-  url.searchParams.set("size","20");
-  url.searchParams.set("focus.point.lat","60.389");
-  url.searchParams.set("focus.point.lon","5.333");
-
+  const url=new URL(ENTUR_GC);
+  url.searchParams.set("text","Bergen busstasjon"); url.searchParams.set("lang","no"); url.searchParams.set("size","20"); url.searchParams.set("focus.point.lat","60.389"); url.searchParams.set("focus.point.lon","5.333");
   try{
-    const res = await fetch(url.toString(), {headers:{"ET-Client-Name": CLIENT}});
-    const js = await res.json();
-    const ids = [];
-    (js.features||[]).forEach(f=>{
-      const id = f?.properties?.id || "";
-      if (id.startsWith("NSR:StopPlace:") && !ids.includes(id)) ids.push(id);
-    });
-    const filtered = ids.slice(0,6);
-    const all = Array.from(new Set([...filtered, ...FALLBACK_STOP_IDS]));
-    return all;
+    const res=await withTimeout(fetch(url.toString(),{headers:{"ET-Client-Name":CLIENT}}),5000,"geocoder");
+    const js=await res.json(); const ids=[];
+    (js.features||[]).forEach(f=>{const id=f?.properties?.id||""; if(id.startsWith("NSR:StopPlace:")&&!ids.includes(id)) ids.push(id);});
+    const filtered=ids.slice(0,6); const all=Array.from(new Set([...filtered,...FALLBACK_STOP_IDS])); return all;
   }catch(e){
+    const el=document.getElementById("error"); el.style.display="block"; el.textContent="Geocoder issue: "+e.message+" — using fallback stop IDs.";
     return Array.from(new Set(FALLBACK_STOP_IDS));
   }
 }
 
-const GQL_SP = `
+const GQL_SP=`
 query($id:ID!,$per:Int!,$range:Int!){
   stopPlace(id:$id){
     id name
@@ -156,35 +130,28 @@ query($id:ID!,$per:Int!,$range:Int!){
 
 async function gql(query,variables){
   let lastErr=null;
-  for (const url of ENDPOINTS){
+  for(const url of ENDPOINTS){
     try{
-      const res = await fetch(url, {
-        method:"POST",
-        headers: {"content-type":"application/json","ET-Client-Name": CLIENT},
-        body: JSON.stringify({query, variables})
-      });
-      const js = await res.json();
-      if (!js.errors) return js;
-      lastErr = new Error(js.errors[0]?.message || "GraphQL error");
-    }catch(e){ lastErr=e; }
+      const res=await withTimeout(fetch(url,{method:"POST",headers:{"content-type":"application/json","ET-Client-Name":CLIENT},body:JSON.stringify({query,variables})}),7000,"graphql");
+      const js=await res.json(); if(!js.errors) return js; lastErr=new Error(js.errors[0]?.message||"GraphQL error");
+    }catch(e){lastErr=e;}
   }
-  throw lastErr || new Error("All endpoints failed");
+  throw lastErr||new Error("All endpoints failed");
 }
 
 function buildRowsFromStopPlace(sp){
-  const rows = [];
-  const quays = sp?.quays || [];
-  for (const q of quays){
-    const calls = q?.estimatedCalls || [];
-    for (const c of calls){
-      const line = c?.serviceJourney?.journeyPattern?.line || {};
+  const rows=[]; const quays=sp?.quays||[];
+  for(const q of quays){
+    const calls=q?.estimatedCalls||[];
+    for(const c of calls){
+      const line=c?.serviceJourney?.journeyPattern?.line||{};
       rows.push({
-        t: c?.expectedDepartureTime,
-        in: mins(c?.expectedDepartureTime),
-        line: (line.publicCode || line.name || "").toUpperCase(),
-        dest: (c?.destinationDisplay?.frontText || "").trim(),
-        stop: q?.publicCode ? `Perrong ${q.publicCode}` : (q?.name || "—"),
-        mode: (line.transportMode || "").toUpperCase()
+        t:c?.expectedDepartureTime,
+        in:mins(c?.expectedDepartureTime),
+        line:(line.publicCode||line.name||"").toUpperCase(),
+        dest:(c?.destinationDisplay?.frontText||"").trim(),
+        stop:q?.publicCode?`Perrong ${q.publicCode}`:(q?.name||"—"),
+        mode:(line.transportMode||"").toUpperCase()
       });
     }
   }
@@ -192,66 +159,37 @@ function buildRowsFromStopPlace(sp){
 }
 
 async function load(){
-  $("#status").textContent = "Looking up live quays…";
-  $("#error").style.display = "none";
-  $("#debug").style.display = "none";
-
-  const ids = await findStopPlaces();
-
-  const allRows = [];
-  let totalQuays = 0, spCount=0;
-  for (const id of ids){
+  $("#status").textContent="Looking up live quays…"; $("#debug").style.display="none";
+  const ids=await findStopPlaces();
+  const allRows=[]; let totalQuays=0,spCount=0;
+  for(const id of ids){
     try{
-      const js = await gql(GQL_SP, {id, per: PER_FETCH, range: RANGE_SECONDS});
-      const sp = js?.data?.stopPlace;
-      if (sp){
-        spCount++;
-        totalQuays += (sp.quays || []).length;
-        allRows.push(...buildRowsFromStopPlace(sp));
-      }
-    }catch(_){}
+      const js=await gql(GQL_SP,{id,per:PER_FETCH,range:RANGE_SECONDS});
+      const sp=js?.data?.stopPlace;
+      if(sp){ spCount++; totalQuays+=(sp.quays||[]).length; allRows.push(...buildRowsFromStopPlace(sp)); }
+    }catch(e){
+      const el=document.getElementById("error"); el.style.display="block"; el.textContent="Data fetch issue for "+id+": "+e.message;
+    }
   }
-
-  const showBus = $("#busToggle").checked;
-  const showTram = $("#tramToggle").checked;
-  const exact = readLines();
-
-  let rows = allRows
-    .filter(r => r.t)
-    .filter(r => (r.mode!=="TRAM" || showTram) && (r.mode!=="BUS" || showBus));
-
-  if (exact && exact.length) rows = rows.filter(r => exact.includes(r.line));
-
-  rows.sort((a,b)=> new Date(a.t) - new Date(b.t));
-
+  const showBus=$("#busToggle").checked, showTram=$("#tramToggle").checked, exact=readLines();
+  let rows=allRows.filter(r=>r.t).filter(r=>(r.mode!=="TRAM"||showTram)&&(r.mode!=="BUS"||showBus));
+  if(exact&&exact.length) rows=rows.filter(r=>exact.includes(r.line));
+  rows.sort((a,b)=>new Date(a.t)-new Date(b.t));
   render(rows);
-
-  $("#status").textContent = "Loaded";
-  $("#ts").textContent = new Date().toLocaleTimeString([], {hour:"2-digit", minute:"2-digit", second:"2-digit"});
-  $("#debug").style.display = "block";
-  $("#debug").innerHTML = \`<strong>Debug:</strong> stopPlace IDs tried = \${ids.join(", ")} | stopPlaces found=\${spCount}, quays=\${totalQuays}, rows=\${rows.length}\`;
+  $("#status").textContent="Loaded"; $("#ts").textContent=new Date().toLocaleTimeString([], {hour:"2-digit", minute:"2-digit", second:"2-digit"});
+  $("#debug").style.display="block"; $("#debug").innerHTML=`<strong>Debug:</strong> stopPlace IDs = ${ids.join(", ")} • stopPlaces=${spCount} • quays=${totalQuays} • rows=${rows.length}`;
 }
 
 function render(rows){
-  const host = document.getElementById("rows");
-  host.innerHTML = "";
-  if (!rows.length){
-    const r = document.createElement("div");
-    r.className = "trow";
-    r.innerHTML = '<div class="cell time">—</div><div class="cell in">—</div><div class="cell line"><span class="dest-dim">No upcoming departures</span></div><div class="cell dest"></div><div class="cell stop"></div><div class="cell mode"></div>';
-    host.appendChild(r);
-    return;
+  const host=document.getElementById("rows"); host.innerHTML="";
+  if(!rows.length){
+    const r=document.createElement("div"); r.className="trow";
+    r.innerHTML='<div class="cell time">—</div><div class="cell in">—</div><div class="cell line"><span style="color:#6b7280">No upcoming departures</span></div><div class="cell dest"></div><div class="cell stop"></div><div class="cell mode"></div>';
+    host.appendChild(r); return;
   }
-  for (const row of rows){
-    const el = document.createElement("div");
-    el.className = "trow";
-    el.innerHTML = \`
-      <div class="cell time">\${fmt(row.t)}</div>
-      <div class="cell in">\${row.in} min</div>
-      <div class="cell line"><span class="line-pill">\${row.line}</span></div>
-      <div class="cell dest">\${row.dest}</div>
-      <div class="cell stop">\${row.stop}</div>
-      <div class="cell mode">\${row.mode==="TRAM"?"Bybanen":"Bus"}</div>\`;
+  for(const row of rows){
+    const el=document.createElement("div"); el.className="trow";
+    el.innerHTML=`<div class="cell time">${fmt(row.t)}</div><div class="cell in">${row.in} min</div><div class="cell line"><span class="line-pill">${row.line}</span></div><div class="cell dest">${row.dest}</div><div class="cell stop">${row.stop}</div><div class="cell mode">${row.mode==="TRAM"?"Bybanen":"Bus"}</div>`;
     host.appendChild(el);
   }
 }
@@ -259,8 +197,7 @@ function render(rows){
 document.getElementById("busToggle").addEventListener("change", load);
 document.getElementById("tramToggle").addEventListener("change", load);
 document.getElementById("exactFilter").addEventListener("change", load);
-load();
-setInterval(load, 15000);
+load(); setInterval(load, REFRESH_MS);
 </script>
 </body>
 </html>
